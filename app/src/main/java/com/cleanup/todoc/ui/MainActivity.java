@@ -15,16 +15,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cleanup.todoc.R;
+import com.cleanup.todoc.injection.ViewModelFactory;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -36,18 +40,21 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     /**
      * List of all projects available in the application
      */
-    private final Project[] allProjects = Project.getAllProjects();
+    private Project[] allProjects;
 
     /**
      * List of all current tasks of the application
      */
     @NonNull
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
      */
-    private final TasksAdapter adapter = new TasksAdapter(tasks, this);
+    private TasksAdapter adapter;
+
+    private TaskViewModel taskViewModel;
+
 
     /**
      * The sort method to be used to display tasks
@@ -93,6 +100,17 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        taskViewModel = new ViewModelProvider(this,
+                ViewModelFactory.getInstance(this))
+                    .get(TaskViewModel.class);
+
+
+        adapter = new TasksAdapter(tasks, this);
+
+        initTaskList();
+
+        initProjectList();
+
         setContentView(R.layout.activity_main);
 
         listTasks = findViewById(R.id.list_tasks);
@@ -136,8 +154,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     @Override
     public void onDeleteTask(Task task) {
-        tasks.remove(task);
-        updateTasks();
+        taskViewModel.removeTask(task);
     }
 
     /**
@@ -163,12 +180,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             // If both project and name of the task have been set
             else if (taskProject != null) {
-                // TODO: Replace this by id of persisted task
-                long id = (long) (Math.random() * 50000);
 
 
                 Task task = new Task(
-                        id,
                         taskProject.getId(),
                         taskName,
                         new Date().getTime()
@@ -209,8 +223,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * @param task the task to be added to the list
      */
     private void addTask(@NonNull Task task) {
-        tasks.add(task);
-        updateTasks();
+        taskViewModel.createTask(task);
     }
 
     /**
@@ -320,5 +333,33 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
          * No sort
          */
         NONE
+    }
+
+    private void initTaskList() {
+        final Observer<List<Task>> taskObserver = new Observer<List<Task>>() {
+            @Override
+            public void onChanged(List<Task> listTasks) {
+                tasks = listTasks;
+                updateTasks();
+            }
+        };
+
+        taskViewModel.getTasks().observe(this,taskObserver);
+    }
+
+    private void initProjectList() {
+        for (int i=0; i<Project.getAllProjects().length; i++) {
+            taskViewModel.createProject(Project.getAllProjects()[i]);
+        }
+
+        final Observer<Project[]> projectObserver = new Observer<Project[]>() {
+            @Override
+            public void onChanged(Project[] projects) {
+                allProjects = projects;
+
+            }
+        };
+
+        taskViewModel.getArrayProjects().observe(this,projectObserver);
     }
 }

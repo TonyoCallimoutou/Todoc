@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.cleanup.todoc.ui.MainActivity;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +18,7 @@ import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.cleanup.todoc.TestUtils.actionOnItemViewAtPosition;
 import static com.cleanup.todoc.TestUtils.withRecyclerView;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -34,6 +36,24 @@ import androidx.test.runner.AndroidJUnit4;
 public class MainActivityInstrumentedTest {
     @Rule
     public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
+
+    @Before
+    public void initList() {
+        MainActivity activity = rule.getActivity();
+        RecyclerView listTasks = activity.findViewById(R.id.list_tasks);
+
+        int nbrItem = listTasks.getAdapter().getItemCount();
+
+        if (nbrItem != 0) {
+            for (int i = 0; i < nbrItem; i++) {
+                onView(withId(R.id.list_tasks))
+                        .perform(actionOnItemViewAtPosition(0, R.id.img_delete, click()));
+            }
+        }
+
+
+
+    }
 
     @Test
     public void addAndRemoveTask() {

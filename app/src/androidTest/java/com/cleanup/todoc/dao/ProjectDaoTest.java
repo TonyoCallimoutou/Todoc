@@ -56,7 +56,7 @@ public class ProjectDaoTest {
     @Test
     public void insertAndGetProject() throws InterruptedException {
 
-        Project newProject = new Project(100,"Project Test 1",0xFFEADAD1);
+        Project newProject = Project.getAllProjects()[1];
 
         Project[] emptyArray = LivedataTestUtils.getValue(database.projectDao().getArrayProjects());
 

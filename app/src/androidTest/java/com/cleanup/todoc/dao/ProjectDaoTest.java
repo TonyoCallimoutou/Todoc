@@ -68,6 +68,9 @@ public class ProjectDaoTest {
         Project[] projects = LivedataTestUtils.getValue(database.projectDao().getArrayProjects());
 
         assertEquals(1, projects.length);
+        assertEquals(newProject.getId(),projects[0].getId());
+        assertEquals(newProject.getName(), projects[0].getName());
+        assertEquals(newProject.getColor(), projects[0].getColor());
 
     }
 }

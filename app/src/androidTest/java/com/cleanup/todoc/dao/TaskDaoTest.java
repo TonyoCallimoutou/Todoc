@@ -2,6 +2,7 @@ package com.cleanup.todoc.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -86,7 +87,9 @@ public class TaskDaoTest {
         List<Task> tasks = LivedataTestUtils.getValue(database.taskDao().getTasks());
 
         assertEquals(1, tasks.size());
-
+        assertEquals(newTask.getName(), tasks.get(0).getName());
+        assertEquals(newTask.getProjectId(), tasks.get(0).getProjectId());
+        assertEquals(newTask.getCreationTimestamp(), tasks.get(0).getCreationTimestamp());
     }
 
     @Test
